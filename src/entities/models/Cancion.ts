@@ -1,13 +1,20 @@
-import { z } from "zod/v4";
+import { Media } from "./Media";
+  }
+export class Cancion extends Media {
+    private readonly artista: string;
+    private readonly album: string;
+    private readonly genero: string;
 
-export const CancionSchema = z.object({
-    id: z.uuid(),
-    titulo: z.string().min(1).max(100),
-    artistas: z.array(z.uuid()),
-    duracion: z.number().positive(),
-    urlArchivo: z.url(),
-    genero: z.uuid(),
-    albumId: z.uuid().optional()
-});
 
-export type Cancion = z.infer<typeof CancionSchema>;
+    constructor(
+        id: string,
+        titulo: string,
+        duracion: number,
+        public readonly artista: string,
+        public readonly album?: string,
+        public readonly genero?: string,
+        public readonly anioLanzamiento?: number
+    ) {
+        super(id, "cancion", titulo, duracion);
+
+    }

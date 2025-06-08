@@ -1,13 +1,23 @@
-import { z } from "zod/v4";
+import { Usuario } from "./Usuario";
 
-export const PlaylistSchema = z.object({
-    id: z.string().uuid(),
-    nombre: z.string().min(1).max(100),
-    canciones: z.array(z.string().uuid()),
-    creadorId: z.string().uuid(),
-    tipo: z.enum(["usuario", "album"]),
-    esPublica: z.boolean(),
-    portadaUrl: z.string().url().optional()
-});
+export class Playlist extends ArrayMusica {
+    private readonly creadorId: Usuario["id"];
+    private readonly esPublica: boolean;
+    private readonly descripcion?: String;
+    private readonly portadaUrl?: string;
 
-export type Playlist = z.infer<typeof PlaylistSchema>;
+    constructor(params: {
+        creador: string;
+        esPublica: boolean;
+        descripcion?: string;
+        portadaUrl?: string;
+    }) {
+        super();
+        this.creadorId = params.creador;
+        this.esPublica = params.esPublica;
+        this.descripcion = params.descripcion;
+        this.portadaUrl = params.portadaUrl;
+    }
+
+
+}

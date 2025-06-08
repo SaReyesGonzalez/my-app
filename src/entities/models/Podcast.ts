@@ -1,12 +1,16 @@
-import { z } from "zod/v4";
+import { Media } from "./Media";
 
-export const PodcastSchema = z.object({
-    id: z.string().uuid(),
-    titulo: z.string().min(1).max(100),
-    autor: z.string().min(1).max(100),
-    categoria: z.string().min(1),
-    duracion: z.number().positive(),
-    urlArchivo: z.string().url()
-});
-
-export type Podcast = z.infer<typeof PodcastSchema>;
+export class Podcast extends Media {
+    constructor(
+        id: string,
+        titulo: string,
+        duracion: number,
+        public readonly anfitrion: string,
+        public readonly episodios: number,
+        public readonly descripcion?: string,
+        public readonly categoria?: string,
+        public readonly anioInicio?: number
+    ) {
+        super(id, "podcast", titulo, duracion);
+    }
+}

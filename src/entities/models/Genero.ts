@@ -1,10 +1,17 @@
-import { z } from "zod/v4";
+export class Genero {
+    private id: string;
+    private nombre: string;
 
-export const GeneroSchema = z.object({
-    id: z.string().uuid(),
-    nombre: z.string().min(1).max(50),
-    descripcion: z.string().max(200).optional(),
-    imagenUrl: z.string().url().optional()
-});
+    constructor(id: string, nombre: string) {
+        this.id = id;
+        this.nombre = nombre;
+    }
 
-export type Genero = z.infer<typeof GeneroSchema>;
+    getId(): string {
+        return this.id;
+    }
+
+    getNombre(): string {
+        return this.nombre;
+    }
+}
