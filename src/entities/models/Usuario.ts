@@ -1,15 +1,15 @@
-import { Artista } from "./Artista";
+import { Autor } from "./Autor";
 import { Genero } from "./Genero";
 
 export type RolUsuario = "invitado" | "usuario" | "admin";
 
 export interface PreferenciasUsuario {
     generosFavoritos: Genero[];
-    artistasFavoritos: Artista[];
+    artistasFavoritos: Autor[];
 }
 
 export class Usuario {
-    private id: string;
+    private readonly id: string;
     private rol: RolUsuario;
     private nombre?: string;
     private email?: string;

@@ -1,6 +1,6 @@
 export class Genero {
-    private id: string;
-    private nombre: string;
+    private readonly id: string;
+    private readonly nombre: string;
 
     constructor(id: string, nombre: string) {
         this.id = id;

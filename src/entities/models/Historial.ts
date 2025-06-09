@@ -1,16 +1,18 @@
+import { Media } from "./Media";
+import { Usuario } from "./Usuario";
+
 export interface EntradaHistorial {
-    contenidoId: string;      // ID del contenido reproducido
+    contenidoId: Media;      // ID del contenido reproducido
     titulo: string;          // Nombre del contenido para mostrar rápido
-    tipoContenido: "podcast" | "cancion";
     fechaReproduccion: Date;  // Cuándo se reprodujo
     progreso?: number;        // Progreso en segundos (opcional, útil para continuar viendo Podcasts)
 }
 
 export class HistorialReproduccion {
-    private usuarioId: string;
+    private usuarioId: Usuario;
     private entradas: EntradaHistorial[];
 
-    constructor(params: { usuarioId: string; entradas?: EntradaHistorial[] }) {
+    constructor(params: { usuarioId: Usuario; entradas?: EntradaHistorial[] }) {
         this.usuarioId = params.usuarioId;
         this.entradas = params.entradas ?? [];
     }

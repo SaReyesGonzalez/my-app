@@ -1,6 +1,6 @@
 import { Genero } from "./Genero";
 
-export class Artista {
+export class Autor {
     private id: string;
     private nombre: string;
     private generos: Genero[];
