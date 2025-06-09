@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -50,6 +51,16 @@ export default function Home() {
             Read our docs
           </a>
         </div>
+
+        <main style={{ textAlign: 'center', marginTop: '3rem' }}>
+          <h1>¡Bienvenido a la Plataforma de Streaming!</h1>
+          <p>Accede o regístrate para comenzar.</p>
+          <div style={{ marginTop: 32 }}>
+            <Link href="/auth/signin">Iniciar sesión</Link> |{" "}
+            <Link href="/auth/register">Registrarse</Link> |{" "}
+            <Link href="/auth/guest">Entrar como invitado</Link>
+          </div>
+        </main>
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a
