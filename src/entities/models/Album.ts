@@ -1,39 +1,41 @@
-import { Autor } from "./Autor";
-import { Genero } from "./Genero";
 import { ArrayMusica } from "./ArrayMusica";
 import { Media } from "./Media";
 
+/**
+ * Entidad Álbum musical.
+ * Usa solo IDs para reducir acoplamiento.
+ */
 export class Album extends ArrayMusica {
-    private readonly artistaId: Autor["id"];
+    private readonly artistaId: string; // Solo ID
     private canciones: Media[];
-    private readonly genero: Genero;
+    private readonly generoId: string; // Solo ID
     private readonly fechaCreacion: Date;
-    private readonly discografica?: string; // Opcional
+    private readonly discografica?: string;
 
     constructor(
         id: string,
         nombre: string,
         canciones: Media[],
-        artistaId: Autor["id"],
-        genero: Genero,
+        artistaId: string,
+        generoId: string,
         fechaCreacion: Date,
         portada?: string,
-        discografica?: string // Opcional
+        discografica?: string
     ) {
         super(id, nombre, portada);
         this.canciones = canciones;
         this.artistaId = artistaId;
-        this.genero = genero;
+        this.generoId = generoId;
         this.fechaCreacion = fechaCreacion;
         this.discografica = discografica || "";
     }
 
-    getArtistaId(): Autor["id"] {
+    getArtistaId(): string {
         return this.artistaId;
     }
 
-    getGenero(): Genero {
-        return this.genero;
+    getGeneroId(): string {
+        return this.generoId;
     }
 
     getFechaCreacion(): Date {
@@ -56,5 +58,20 @@ export class Album extends ArrayMusica {
         return this.canciones;
     }
 
+    getMediaCount(): number {
+        return this.canciones.length;
+    }
 
+    clearContenido(): void {
+        this.canciones = [];
+    }
+
+    /**
+     * Reordena las canciones del álbum.
+     */
+    reordenarCanciones(nuevoOrden: string[]): void {
+        this.canciones = nuevoOrden
+            .map(id => this.canciones.find(c => c.getId() === id))
+            .filter((c): c is Media => !!c);
+    }
 }

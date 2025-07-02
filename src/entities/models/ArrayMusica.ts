@@ -1,3 +1,6 @@
+/**
+ * Clase base abstracta para listas musicales (álbumes, playlists).
+ */
 export abstract class ArrayMusica {
     protected readonly id: string;
     protected nombre: string;
@@ -32,4 +35,13 @@ export abstract class ArrayMusica {
         this.portadaUrl = portadaUrl;
     }
 
+    /**
+     * Método abstracto para obtener la cantidad de medios.
+     */
+    abstract getMediaCount(): number;
+
+    /**
+     * Método abstracto para limpiar el contenido.
+     */
+    abstract clearContenido(): void;
 }

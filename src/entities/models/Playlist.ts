@@ -1,9 +1,12 @@
-import { Usuario } from "./Usuario";
 import { ArrayMusica } from "./ArrayMusica";
 import { Media } from "./Media";
 
+/**
+ * Entidad Playlist.
+ * Usa solo IDs para reducir acoplamiento.
+ */
 export class Playlist extends ArrayMusica {
-    private readonly creadorId: Usuario["id"];
+    private readonly creadorId: string; // Solo ID
     private contenido: Media[];
     private esPublica: boolean;
     private descripcion?: string;
@@ -11,7 +14,7 @@ export class Playlist extends ArrayMusica {
     constructor(
         id: string,
         nombre: string,
-        creadorId: Usuario["id"],
+        creadorId: string,
         contenido: Media[],
         esPublica: boolean,
         portadaUrl?: string,
@@ -24,7 +27,7 @@ export class Playlist extends ArrayMusica {
         this.descripcion = descripcion;
     }
 
-    getCreadorId(): Usuario["id"] {
+    getCreadorId(): string {
         return this.creadorId;
     }
 
@@ -72,4 +75,19 @@ export class Playlist extends ArrayMusica {
         return this.contenido.find(media => media.getId() === id);
     }
 
+    /**
+     * Reordena el contenido de la playlist.
+     */
+    reordenarContenido(nuevoOrden: string[]): void {
+        this.contenido = nuevoOrden
+            .map(id => this.contenido.find(c => c.getId() === id))
+            .filter((c): c is Media => !!c);
+    }
+
+    /**
+     * Cambia la privacidad de la playlist.
+     */
+    cambiarPrivacidad(esPublica: boolean): void {
+        this.esPublica = esPublica;
+    }
 }

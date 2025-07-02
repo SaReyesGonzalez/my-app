@@ -1,31 +1,20 @@
-import { Genero } from "./Genero";
-
+/**
+ * Entidad Autor musical.
+ * Solo almacena datos esenciales y usa IDs para relaciones.
+ */
 export class Autor {
-    private id: string;
+    private readonly id: string;
     private nombre: string;
-    private generos: Genero[];
-    private descripcion?: string;
-    private imagenUrl?: string;
+    private biografia?: string;
+    private generos: string[]; // IDs de géneros
 
-    constructor(params: {
-        id: string;
-        nombre: string;
-        generos: Genero[];
-        descripcion?: string;
-        imagenUrl?: string;
-    }) {
+    constructor(params: { id: string; nombre: string; biografia?: string; generos?: string[] }) {
         this.id = params.id;
         this.nombre = params.nombre;
-        this.generos = params.generos;
-        this.descripcion = params.descripcion;
-        this.imagenUrl = params.imagenUrl;
-
-        if (!this.id || !this.nombre || this.generos.length === 0) {
-            throw new Error("ID, nombre y al menos un género son requeridos.");
-        }
+        this.biografia = params.biografia;
+        this.generos = params.generos ?? [];
     }
 
-    // Getters
     getId(): string {
         return this.id;
     }
@@ -34,25 +23,39 @@ export class Autor {
         return this.nombre;
     }
 
-    getGeneros(): Genero[] {
-        return this.generos;
+    setNombre(nombre: string): void {
+        this.nombre = nombre;
     }
 
-    getDescripcion(): string | undefined {
-        return this.descripcion;
+    getBiografia(): string | undefined {
+        return this.biografia;
     }
 
-    getImagenUrl(): string | undefined {
-        return this.imagenUrl;
+    setBiografia(bio: string): void {
+        this.biografia = bio;
     }
 
-    // Métodos de dominio
-
-    actualizarDescripcion(descripcion: string): void {
-        this.descripcion = descripcion;
+    getGeneros(): string[] {
+        return [...this.generos];
     }
 
-    actualizarImagenUrl(imagenUrl: string): void {
-        this.imagenUrl = imagenUrl;
+    agregarGenero(generoId: string): void {
+        if (!this.generos.includes(generoId)) {
+            this.generos.push(generoId);
+        }
+    }
+
+    quitarGenero(generoId: string): void {
+        this.generos = this.generos.filter(id => id !== generoId);
+    }
+}
+
+/**
+ * Error personalizado para la entidad Autor.
+ */
+export class AutorError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "AutorError";
     }
 }

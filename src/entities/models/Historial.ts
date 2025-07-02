@@ -1,24 +1,28 @@
-import { Media } from "./Media";
-import { Usuario } from "./Usuario";
-
+/**
+ * Entrada individual del historial de reproducción.
+ */
 export interface EntradaHistorial {
-    contenidoId: Media;      // ID del contenido reproducido
-    titulo: string;          // Nombre del contenido para mostrar rápido
+    contenidoId: string;      // ID del contenido reproducido
+    titulo: string;           // Nombre del contenido para mostrar rápido
     fechaReproduccion: Date;  // Cuándo se reprodujo
-    progreso?: number;        // Progreso en segundos (opcional, útil para continuar viendo Podcasts)
+    progreso?: number;        // Progreso en segundos (opcional)
+    tipoContenido?: string;   // Tipo de contenido (opcional, para filtrado)
 }
 
+/**
+ * Historial de reproducción de un usuario o autor.
+ */
 export class HistorialReproduccion {
-    private usuarioId: Usuario;
+    private autorId: string;
     private entradas: EntradaHistorial[];
 
-    constructor(params: { usuarioId: Usuario; entradas?: EntradaHistorial[] }) {
-        this.usuarioId = params.usuarioId;
+    constructor(params: { autorId: string; entradas?: EntradaHistorial[] }) {
+        this.autorId = params.autorId;
         this.entradas = params.entradas ?? [];
     }
 
-    getUsuarioId(): string {
-        return this.usuarioId;
+    getAutorId(): string {
+        return this.autorId;
     }
 
     getEntradas(): EntradaHistorial[] {
@@ -32,7 +36,6 @@ export class HistorialReproduccion {
 
     obtenerUltimaEntrada(): EntradaHistorial | undefined {
         if (this.entradas.length === 0) return undefined;
-        // Suponiendo que las entradas están ordenadas por fecha de reproducción
         return this.entradas[this.entradas.length - 1];
     }
 
@@ -40,13 +43,41 @@ export class HistorialReproduccion {
         this.entradas = [];
     }
 
-    // (Opcional) Obtener historial filtrado por tipo de contenido
-    filtrarPorTipo(tipo: EntradaHistorial["tipoContenido"]): EntradaHistorial[] {
+    /**
+     * Filtra el historial por tipo de contenido.
+     */
+    filtrarPorTipo(tipo: string): EntradaHistorial[] {
         return this.entradas.filter(e => e.tipoContenido === tipo);
     }
 
-    // (Opcional) Obtener historial de los últimos N elementos
+    /**
+     * Obtiene los últimos N elementos del historial.
+     */
     ultimos(n: number): EntradaHistorial[] {
         return this.entradas.slice(-n);
+    }
+
+    /**
+     * Busca entradas por fecha exacta.
+     */
+    buscarPorFecha(fecha: Date): EntradaHistorial[] {
+        return this.entradas.filter(e => e.fechaReproduccion.toDateString() === fecha.toDateString());
+    }
+
+    /**
+     * Filtra entradas por coincidencia en el título.
+     */
+    filtrarPorTitulo(texto: string): EntradaHistorial[] {
+        return this.entradas.filter(e => e.titulo.toLowerCase().includes(texto.toLowerCase()));
+    }
+}
+
+/**
+ * Error personalizado para historial.
+ */
+export class HistorialError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "HistorialError";
     }
 }

@@ -1,53 +1,79 @@
-import { ArrayMusica } from "./ArrayMusica";
-import { Autor } from "./Autor";
-import { Genero } from "./Genero";
-
-type TipoMedia = "cancion" | "podcast";
-
+/**
+ * Clase abstracta para medios musicales (canción, podcast, etc.).
+ * Define la interfaz base para todos los tipos de media.
+ */
 export abstract class Media {
-    private readonly id: string;
-    private readonly tipo: TipoMedia; // Tipo de medio, puede ser "Canción", "Podcast", etc.
-    private readonly titulo: string;
-    private readonly duracion: number; // en segundos
-    private readonly autor: Autor;
-    private genero: Genero[];
-    private almacenaje?: ArrayMusica;
-    private nEpidodios?: number;
+    protected readonly id: string;
+    protected titulo: string;
+    protected duracion: number; // en segundos
+    protected autorId: string; // ID del autor
+    protected generoId: string; // ID del género
+    protected fechaLanzamiento: Date;
 
-    constructor(
-        id: string,
-        tipo: TipoMedia,
-        titulo: string,
-        duracion: number, // en segundos
-        autor: Autor, // Opcional, puede ser un artista o un anfitrión
-        genero: Genero[], // Opcional, puede ser un array de géneros
-        almacenaje: ArrayMusica, // Almacenamiento por defecto
-        nEpidodios?: number // Número de episodios, opcional para podcasts
-    ) {
-        this.id = id;
-        this.tipo = tipo;
-        this.titulo = titulo;
-        this.duracion = duracion;
-        this.autor = autor;
-        this.genero = genero;
-        this.almacenaje = almacenaje;
-        this.nEpidodios = nEpidodios;
-
-        // Validación de los parámetros
-        if (!this.id) throw new Error("El ID es requerido.");
-        if (!this.titulo) throw new Error("El título es requerido.");
-        if (this.duracion <= 0) throw new Error("La duración debe ser un número positivo.");
-        if (!this.autor) throw new Error("El autor es requerido.");
+    constructor(params: {
+        id: string;
+        titulo: string;
+        duracion: number;
+        autorId: string;
+        generoId: string;
+        fechaLanzamiento: Date;
+    }) {
+        this.id = params.id;
+        this.titulo = params.titulo;
+        this.duracion = params.duracion;
+        this.autorId = params.autorId;
+        this.generoId = params.generoId;
+        this.fechaLanzamiento = params.fechaLanzamiento;
     }
 
-    // Getters
-    getId() { return this.id; }
-    getTipo() { return this.tipo; }
-    getTitulo() { return this.titulo; }
-    getDuracion() { return this.duracion; }
-    getAutor() { return this.autor; }
-    getGenero() { return this.genero; }
-    getAlmacenaje() { return this.almacenaje; }
-    getNEpisodios() { return this.nEpidodios; }
+    getId(): string {
+        return this.id;
+    }
 
+    getTitulo(): string {
+        return this.titulo;
+    }
+
+    setTitulo(titulo: string): void {
+        this.titulo = titulo;
+    }
+
+    getDuracion(): number {
+        return this.duracion;
+    }
+
+    setDuracion(duracion: number): void {
+        this.duracion = duracion;
+    }
+
+    getAutorId(): string {
+        return this.autorId;
+    }
+
+    getGeneroId(): string {
+        return this.generoId;
+    }
+
+    getFechaLanzamiento(): Date {
+        return this.fechaLanzamiento;
+    }
+
+    setFechaLanzamiento(fecha: Date): void {
+        this.fechaLanzamiento = fecha;
+    }
+
+    /**
+     * Método abstracto para reproducir el medio.
+     */
+    abstract reproducir(): void;
+}
+
+/**
+ * Error personalizado para la entidad Media.
+ */
+export class MediaError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "MediaError";
+    }
 }

@@ -1,13 +1,19 @@
-import { Autor } from "./Autor";
-import { Genero } from "./Genero";
-
+/**
+ * Tipos de rol de usuario.
+ */
 export type RolUsuario = "invitado" | "usuario" | "admin";
 
+/**
+ * Preferencias del usuario, usando solo IDs para reducir acoplamiento.
+ */
 export interface PreferenciasUsuario {
-    generosFavoritos: Genero[];
-    artistasFavoritos: Autor[];
+    generosFavoritos: string[]; // IDs de género
+    artistasFavoritos: string[]; // IDs de autor
 }
 
+/**
+ * Entidad Usuario.
+ */
 export class Usuario {
     private readonly id: string;
     private rol: RolUsuario;
@@ -36,10 +42,10 @@ export class Usuario {
 
         // Validación según rol
         if (this.rol !== "invitado") {
-            if (!this.nombre) throw new Error("El nombre es requerido para usuarios registrados.");
-            if (!this.email) throw new Error("El email es requerido para usuarios registrados.");
-            if (!this.contraseñaHash) throw new Error("La contraseña es requerida para usuarios registrados.");
-            if (!this.fechaRegistro) throw new Error("La fecha de registro es requerida para usuarios registrados.");
+            if (!this.nombre) throw new UsuarioError("El nombre es requerido para usuarios registrados.");
+            if (!this.email) throw new UsuarioError("El email es requerido para usuarios registrados.");
+            if (!this.contraseñaHash) throw new UsuarioError("La contraseña es requerida para usuarios registrados.");
+            if (!this.fechaRegistro) throw new UsuarioError("La fecha de registro es requerida para usuarios registrados.");
         }
     }
 
@@ -55,20 +61,23 @@ export class Usuario {
     // Métodos de dominio
     cambiarContraseña(nuevoHash: string) {
         if (!nuevoHash || nuevoHash.length < 6) {
-            throw new Error("La nueva contraseña debe tener al menos 6 caracteres.");
+            throw new UsuarioError("La nueva contraseña debe tener al menos 6 caracteres.");
         }
         this.contraseñaHash = nuevoHash;
     }
 
     cambiarNombre(nuevoNombre: string) {
         if (!nuevoNombre || nuevoNombre.length < 2) {
-            throw new Error("El nombre debe tener al menos 2 caracteres.");
+            throw new UsuarioError("El nombre debe tener al menos 2 caracteres.");
         }
         this.nombre = nuevoNombre;
     }
 
     cambiarEmail(nuevoEmail: string) {
-        // Aquí podrías añadir validación de formato de email
+        // Validación simple de email
+        if (!nuevoEmail || !nuevoEmail.includes("@")) {
+            throw new UsuarioError("El email no es válido.");
+        }
         this.email = nuevoEmail;
     }
 
@@ -82,5 +91,51 @@ export class Usuario {
 
     esAdmin(): boolean {
         return this.rol === "admin";
+    }
+
+    /**
+     * Agrega un autor favorito por ID.
+     */
+    agregarAutorFavorito(autorId: string) {
+        if (!this.preferencias) this.preferencias = { generosFavoritos: [], artistasFavoritos: [] };
+        if (!this.preferencias.artistasFavoritos.includes(autorId)) {
+            this.preferencias.artistasFavoritos.push(autorId);
+        }
+    }
+
+    /**
+     * Quita un autor favorito por ID.
+     */
+    quitarAutorFavorito(autorId: string) {
+        if (!this.preferencias) return;
+        this.preferencias.artistasFavoritos = this.preferencias.artistasFavoritos.filter(id => id !== autorId);
+    }
+
+    /**
+     * Agrega un género favorito por ID.
+     */
+    agregarGeneroFavorito(generoId: string) {
+        if (!this.preferencias) this.preferencias = { generosFavoritos: [], artistasFavoritos: [] };
+        if (!this.preferencias.generosFavoritos.includes(generoId)) {
+            this.preferencias.generosFavoritos.push(generoId);
+        }
+    }
+
+    /**
+     * Quita un género favorito por ID.
+     */
+    quitarGeneroFavorito(generoId: string) {
+        if (!this.preferencias) return;
+        this.preferencias.generosFavoritos = this.preferencias.generosFavoritos.filter(id => id !== generoId);
+    }
+}
+
+/**
+ * Error personalizado para la entidad Usuario.
+ */
+export class UsuarioError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "UsuarioError";
     }
 }
