@@ -1,6 +1,6 @@
-# Configuración de Neo4j Aura
+# Configuración de Neo4j Aura para Recomendaciones Musicales
 
-Este documento explica cómo configurar y usar Neo4j Aura en el proyecto de plataforma de streaming.
+Este documento explica cómo configurar y usar Neo4j Aura para el sistema de recomendaciones musicales de la plataforma de streaming.
 
 ## Configuración Inicial
 
@@ -10,9 +10,10 @@ Asegúrate de tener las siguientes variables en tu archivo `.env.local`:
 
 ```env
 # Neo4j Aura
-NEO4J_URI=bolt://your-aura-instance.neo4j.io:7687
+NEO4J_URI=neo4j+s://356234f6.databases.neo4j.io
 NEO4J_USER=neo4j
-NEO4J_PASSWORD=your-password
+NEO4J_PASSWORD=4FZJjHYO8vO7FENyIAtVyhx1pfxBTvrpGXRC6Cmokes
+NEO4J_DATABASE=neo4j
 ```
 
 ### 2. Instalación de Dependencias
@@ -21,25 +22,30 @@ NEO4J_PASSWORD=your-password
 npm install
 ```
 
+## Propósito de Neo4j en el Proyecto
+
+**Neo4j NO se usa para usuarios registrados** (eso se maneja con MongoDB). Neo4j se usa específicamente para:
+
+- 🎵 **Recomendaciones de canciones** basadas en preferencias
+- 👥 **Análisis de relaciones** entre usuarios y música
+- 🎼 **Descubrimiento de música** por género y similitud
+- 📊 **Análisis de patrones** de escucha
+- 🔗 **Relaciones complejas** entre canciones, autores y géneros
+
 ## Estructura de la Base de Datos
 
 ### Nodos Principales
 
-- **Usuario**: Representa a los usuarios de la plataforma
-- **Genero**: Géneros musicales
-- **Artista**: Artistas musicales
+- **Usuario**: Usuarios que escuchan música (referencia desde MongoDB)
 - **Cancion**: Canciones individuales
-- **Album**: Álbumes de música
-- **Playlist**: Listas de reproducción
+- **Autor**: Autores/artistas musicales
+- **Genero**: Géneros musicales
 
 ### Relaciones Principales
 
-- `(Usuario)-[:PREFIERE]->(Genero)`: Usuario prefiere un género
-- `(Usuario)-[:SIGUE]->(Artista)`: Usuario sigue a un artista
-- `(Usuario)-[:CREA]->(Playlist)`: Usuario crea una playlist
-- `(Artista)-[:CANTE]->(Cancion)`: Artista canta una canción
-- `(Cancion)-[:PERTENECE]->(Album)`: Canción pertenece a un álbum
-- `(Cancion)-[:ES_GENERO]->(Genero)`: Canción es de un género
+- `(Usuario)-[:ESCUCHA]->(Cancion)`: Usuario escucha una canción
+- `(Autor)-[:CANTA]->(Cancion)`: Autor canta una canción
+- `(Cancion)-[:ES_GENERO]->(Genero)`: Canción pertenece a un género
 
 ## Endpoints Disponibles
 
@@ -48,86 +54,113 @@ npm install
 GET /api/neo4j/test
 ```
 
-### 2. Ejecutar Consulta Cypher Personalizada
+### 2. Recomendaciones Musicales
 ```bash
-POST /api/neo4j/test
-Content-Type: application/json
+# Recomendaciones por usuario
+GET /api/neo4j/recommendations?tipo=usuario&usuarioId=123&limite=10
 
-{
-  "query": "MATCH (u:Usuario) RETURN u LIMIT 5",
-  "parameters": {}
-}
+# Recomendaciones por género
+GET /api/neo4j/recommendations?tipo=genero&generoId=456&limite=10
+
+# Canciones similares
+GET /api/neo4j/recommendations?tipo=similares&cancionId=789&limite=5
+
+# Autores recomendados
+GET /api/neo4j/recommendations?tipo=autores&usuarioId=123&limite=5
+
+# Tendencias
+GET /api/neo4j/recommendations?tipo=tendencias&limite=10
+
+# Usuarios con gustos similares
+GET /api/neo4j/recommendations?tipo=usuarios_similares&usuarioId=123&limite=5
 ```
 
-### 3. Gestión de Usuarios
+### 3. Registrar Reproducción
 ```bash
-# Crear usuario
-POST /api/neo4j/users
+POST /api/neo4j/recommendations
 Content-Type: application/json
 
 {
-  "email": "usuario@ejemplo.com",
-  "password": "contraseña123",
-  "name": "Nombre Usuario"
+  "usuarioId": "123",
+  "cancionId": "456"
 }
-
-# Buscar usuario por email
-GET /api/neo4j/users?email=usuario@ejemplo.com
-
-# Buscar usuario por ID
-GET /api/neo4j/users?id=user-id-here
 ```
 
 ## Consultas Cypher Útiles
 
-### Crear Usuario
+### Crear Canción con Relaciones
 ```cypher
-CREATE (u:Usuario {
-  id: $id,
-  email: $email,
-  nombre: $nombre,
-  contraseñaHash: $contraseñaHash,
-  rol: $rol,
-  fechaRegistro: datetime($fechaRegistro),
-  generosFavoritos: $generosFavoritos,
-  artistasFavoritos: $artistasFavoritos
+MERGE (c:Cancion {
+  id: $cancionId,
+  titulo: $titulo,
+  duracion: $duracion
 })
+MERGE (a:Autor {
+  id: $autorId,
+  nombre: $nombre,
+  biografia: $biografia
+})
+MERGE (g:Genero {
+  id: $generoId,
+  nombre: $generoNombre
+})
+MERGE (a)-[:CANTA]->(c)
+MERGE (c)-[:ES_GENERO]->(g)
 ```
 
-### Buscar Usuario por Email
+### Recomendaciones por Usuario
 ```cypher
-MATCH (u:Usuario {email: $email})
-RETURN u
+MATCH (u:Usuario {id: $usuarioId})-[:ESCUCHA]->(c1:Cancion)-[:ES_GENERO]->(g:Genero)<-[:ES_GENERO]-(c2:Cancion)
+WHERE c1 <> c2
+WITH c2, count(*) as peso
+ORDER BY peso DESC
+LIMIT $limite
+RETURN c2
 ```
 
-### Usuarios que Prefieren un Género
+### Canciones Similares
 ```cypher
-MATCH (u:Usuario)-[:PREFIERE]->(g:Genero {nombre: $genero})
-RETURN u, g
+MATCH (c1:Cancion {id: $cancionId})-[:ES_GENERO]->(g:Genero)<-[:ES_GENERO]-(c2:Cancion)
+WHERE c1 <> c2
+WITH c2, count(*) as similitud
+ORDER BY similitud DESC
+LIMIT $limite
+RETURN c2
 ```
 
-### Recomendaciones de Artistas
+### Tendencias
 ```cypher
-MATCH (u:Usuario)-[:PREFIERE]->(g:Genero)<-[:ES_GENERO]-(c:Cancion)-[:CANTE]->(a:Artista)
-WHERE u.id = $usuarioId
-RETURN DISTINCT a
-LIMIT 10
+MATCH (u:Usuario)-[:ESCUCHA]->(c:Cancion)
+WITH c, count(*) as reproducciones
+ORDER BY reproducciones DESC
+LIMIT $limite
+RETURN c
 ```
 
-## Ventajas de Usar Neo4j
+## Ventajas de Usar Neo4j para Recomendaciones
 
-1. **Relaciones Complejas**: Fácil modelado de relaciones entre usuarios, artistas, géneros y canciones
-2. **Recomendaciones**: Consultas eficientes para sistemas de recomendación
+1. **Relaciones Complejas**: Fácil modelado de relaciones entre usuarios, canciones, autores y géneros
+2. **Recomendaciones Inteligentes**: Consultas eficientes para sistemas de recomendación basados en grafos
 3. **Análisis de Redes**: Análisis de patrones de escucha y preferencias
 4. **Escalabilidad**: Neo4j Aura proporciona escalabilidad automática
-5. **Consultas Declarativas**: Cypher es intuitivo para consultas complejas
+5. **Consultas Declarativas**: Cypher es intuitivo para consultas complejas de relaciones
+
+## Arquitectura del Sistema
+
+```
+MongoDB (Usuarios) ←→ Neo4j (Recomendaciones) ←→ Redis (Cache)
+     ↓                      ↓                        ↓
+  Autenticación        Relaciones Musicales      Sesiones
+  Registro            Recomendaciones           Cache
+  Perfiles            Análisis de Patrones      Datos Temporales
+```
 
 ## Próximos Pasos
 
 1. Configurar índices para mejorar el rendimiento
-2. Implementar más casos de uso específicos para Neo4j
-3. Crear endpoints para recomendaciones
-4. Implementar análisis de redes sociales
+2. Implementar algoritmos de recomendación más avanzados
+3. Crear dashboards de análisis de datos
+4. Implementar análisis de sentimientos
 5. Optimizar consultas para grandes volúmenes de datos
 
 ## Troubleshooting
@@ -140,4 +173,14 @@ LIMIT 10
 ### Errores de Consulta
 - Usa el endpoint `/api/neo4j/test` para probar consultas
 - Verifica la sintaxis de Cypher
-- Revisa los logs del servidor para errores detallados 
+- Revisa los logs del servidor para errores detallados
+
+### Datos de Prueba
+Para probar el sistema, puedes crear datos de ejemplo usando el endpoint de prueba:
+
+```bash
+POST /api/neo4j/test
+{
+  "query": "CREATE (u:Usuario {id: 'test-user', nombre: 'Usuario Test'}) RETURN u"
+}
+``` 
