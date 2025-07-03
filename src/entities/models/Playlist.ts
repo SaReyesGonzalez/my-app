@@ -90,4 +90,11 @@ export class Playlist extends ArrayMusica {
     cambiarPrivacidad(esPublica: boolean): void {
         this.esPublica = esPublica;
     }
+
+    /**
+     * Cambia la portada de la playlist.
+     */
+    setPortada(portadaUrl: string): void {
+        this.setPortadaUrl(portadaUrl);
+    }
 }
