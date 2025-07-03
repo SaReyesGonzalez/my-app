@@ -9,6 +9,15 @@ export type RolUsuario = "invitado" | "usuario" | "admin";
 export interface PreferenciasUsuario {
     generosFavoritos: string[]; // IDs de género
     artistasFavoritos: string[]; // IDs de autor
+    volumenPreferido?: number;
+    calidadAudio?: "baja" | "media" | "alta";
+}
+
+export interface HistorialUsuario {
+    contenidoId: string;
+    tipo: "cancion" | "podcast";
+    fechaReproduccion: Date;
+    duracionReproducida: number; // en segundos
 }
 
 /**
@@ -22,6 +31,10 @@ export class Usuario {
     private contraseñaHash?: string;
     private fechaRegistro?: Date;
     private preferencias?: PreferenciasUsuario;
+    private favoritos: string[] = [];
+    private playlists: string[] = [];
+    private historial: HistorialUsuario[] = [];
+    private ultimaActividad?: Date;
 
     constructor(params: {
         id: string;
@@ -31,6 +44,10 @@ export class Usuario {
         contraseñaHash?: string;
         fechaRegistro?: Date;
         preferencias?: PreferenciasUsuario;
+        favoritos?: string[];
+        playlists?: string[];
+        historial?: HistorialUsuario[];
+        ultimaActividad?: Date;
     }) {
         this.id = params.id;
         this.rol = params.rol;
@@ -39,6 +56,10 @@ export class Usuario {
         this.contraseñaHash = params.contraseñaHash;
         this.fechaRegistro = params.fechaRegistro;
         this.preferencias = params.preferencias;
+        this.favoritos = params.favoritos || [];
+        this.playlists = params.playlists || [];
+        this.historial = params.historial || [];
+        this.ultimaActividad = params.ultimaActividad;
 
         // Validación según rol
         if (this.rol !== "invitado") {
@@ -57,6 +78,66 @@ export class Usuario {
     getFechaRegistro() { return this.fechaRegistro; }
     getPreferencias() { return this.preferencias; }
     getContraseñaHash() { return this.contraseñaHash; }
+    getFavoritos() { return [...this.favoritos]; }
+    getPlaylists() { return [...this.playlists]; }
+    getHistorial() { return [...this.historial]; }
+    getUltimaActividad() { return this.ultimaActividad; }
+
+    // Métodos de negocio
+    agregarFavorito(contenidoId: string): void {
+        if (this.rol === "invitado") {
+            throw new UsuarioError("Los usuarios invitados no pueden agregar favoritos.");
+        }
+        if (!this.favoritos.includes(contenidoId)) {
+            this.favoritos.push(contenidoId);
+        }
+    }
+
+    removerFavorito(contenidoId: string): void {
+        this.favoritos = this.favoritos.filter(id => id !== contenidoId);
+    }
+
+    agregarPlaylist(playlistId: string): void {
+        if (this.rol === "invitado") {
+            throw new UsuarioError("Los usuarios invitados no pueden crear playlists.");
+        }
+        if (!this.playlists.includes(playlistId)) {
+            this.playlists.push(playlistId);
+        }
+    }
+
+    agregarAlHistorial(historial: HistorialUsuario): void {
+        this.historial.push(historial);
+        this.ultimaActividad = new Date();
+        
+        // Mantener solo los últimos 100 elementos del historial
+        if (this.historial.length > 100) {
+            this.historial = this.historial.slice(-100);
+        }
+    }
+
+      actualizarPreferencias(preferencias: Partial<PreferenciasUsuario>): void {
+    if (this.rol === "invitado") {
+      throw new UsuarioError("Los usuarios invitados no pueden actualizar preferencias.");
+    }
+    this.preferencias = { 
+      generosFavoritos: this.preferencias?.generosFavoritos || [],
+      artistasFavoritos: this.preferencias?.artistasFavoritos || [],
+      ...preferencias 
+    };
+  }
+
+    esUsuarioRegistrado(): boolean {
+        return this.rol !== "invitado";
+    }
+
+    puedeCrearPlaylist(): boolean {
+        return this.rol === "usuario" || this.rol === "admin";
+    }
+
+    puedeAgregarFavoritos(): boolean {
+        return this.rol === "usuario" || this.rol === "admin";
+    }
 
     // Métodos de dominio
     cambiarContraseña(nuevoHash: string) {
