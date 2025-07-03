@@ -8,8 +8,6 @@ const cancionesEjemplo = [
     autorId: "sample-artist",
     generoId: "electronic",
     fechaLanzamiento: new Date("2024-01-01"),
-    albumId: "sample-album",
-    letra: "This is a sample audio file for testing",
     urlAudio: "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav",
     urlPortada: "https://picsum.photos/300/300?random=1"
   },
@@ -19,8 +17,6 @@ const cancionesEjemplo = [
     autorId: "test-artist",
     generoId: "ambient",
     fechaLanzamiento: new Date("2024-01-02"),
-    albumId: "test-album",
-    letra: "Another sample audio for testing purposes",
     urlAudio: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav",
     urlPortada: "https://picsum.photos/300/300?random=2"
   },

@@ -14,61 +14,25 @@ export default function UploadPage() {
   const router = useRouter();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      setError('');
-    }
+    setFile(e.target.files?.[0] || null);
+    setError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!file || !titulo || !autorId || !generoId) {
-      setError('Por favor completa todos los campos');
+    if (!file) {
+      setError('Selecciona un archivo');
       return;
     }
-
-    setUploading(true);
-    setError('');
-    setMessage('');
-
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('titulo', titulo);
-      formData.append('autorId', autorId);
-      formData.append('generoId', generoId);
-
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage('Archivo subido exitosamente!');
-        setFile(null);
-        setTitulo('');
-        setAutorId('');
-        setGeneroId('');
-        
-        // Limpiar el input de archivo
-        const fileInput = document.getElementById('file-input') as HTMLInputElement;
-        if (fileInput) fileInput.value = '';
-        
-        // Redirigir a la biblioteca después de 2 segundos
-        setTimeout(() => {
-          router.push('/music');
-        }, 2000);
-      } else {
-        setError(data.error || 'Error al subir el archivo');
-      }
-    } catch (err) {
-      setError('Error de conexión');
-    } finally {
-      setUploading(false);
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+    const data = await res.json();
+    if (res.ok) {
+      setMessage('Archivo subido: ' + data.publicUrl);
+      setFile(null);
+    } else {
+      setError(data.error || 'Error al subir');
     }
   };
 
