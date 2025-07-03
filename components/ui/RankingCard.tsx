@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 
 interface RankingItem {
   id: string;
@@ -72,10 +73,12 @@ export default function RankingCard({
 
       {/* Imagen */}
       <div className="relative aspect-square">
-        <img
-          src={item.urlImagen}
+        <Image
+          src={item.urlImagen || '/placeholder-music.jpg'}
           alt={item.titulo}
-          className="w-full h-full object-cover"
+          width={300}
+          height={192}
+          className="w-full h-32 object-cover rounded-lg mb-4"
         />
         
         {/* Overlay con botones */}

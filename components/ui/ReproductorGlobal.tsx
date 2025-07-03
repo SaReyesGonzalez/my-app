@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef, useEffect } from 'react';
 import { useAudioPlayer } from '../../context/AudioPlayerContext';
+import Image from 'next/image';
 
 const ReproductorGlobal = () => {
   const {
@@ -62,7 +63,13 @@ const ReproductorGlobal = () => {
       boxShadow: '0 -2px 16px rgba(0,0,0,0.3)'
     }}>
       {currentTrack.urlImagen && (
-        <img src={currentTrack.urlImagen} alt={currentTrack.titulo} style={{ width: 56, height: 56, borderRadius: 8, objectFit: 'cover', boxShadow: '0 2px 8px #0006' }} />
+        <Image
+          src={currentTrack.urlImagen}
+          alt={currentTrack.titulo}
+          width={56}
+          height={56}
+          style={{ borderRadius: 8, objectFit: 'cover', boxShadow: '0 2px 8px #0006' }}
+        />
       )}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontWeight: 600, fontSize: 18, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentTrack.titulo}</div>

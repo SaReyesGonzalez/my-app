@@ -60,6 +60,10 @@ export default function PodcastsPage() {
     }
   };
 
+  useEffect(() => {
+    cargarFavoritos();
+  }, [cargarFavoritos]);
+
   const seleccionarGenero = async (generoId: string) => {
     setGeneroSeleccionado(generoId);
     setLoading(true);

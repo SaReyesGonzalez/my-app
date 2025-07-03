@@ -21,7 +21,6 @@ export default function ContentCard({
   onToggleFavorite,
   showFavoriteButton = true
 }: ContentCardProps) {
-  const [isHovered, setIsHovered] = useState(false);
   const [imgSrc, setImgSrc] = useState(contenido.urlImagen || '/placeholder-music.jpg');
   const { playTrack } = useAudioPlayer();
   const { data: session } = useSession();
@@ -76,9 +75,11 @@ export default function ContentCard({
   return (
     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-all duration-300 flex flex-col justify-between h-full">
       <div className="relative">
-        <img
+        <Image
           src={imgSrc}
           alt={titulo}
+          width={300}
+          height={192}
           className="w-full h-48 object-cover rounded-lg mb-4 bg-gray-200"
         />
         <div className="absolute top-2 right-2">

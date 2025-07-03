@@ -22,17 +22,6 @@ export default function Favoritos() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (status === 'loading') return;
-    
-    if (!session?.user?.id) {
-      router.push('/auth/signin');
-      return;
-    }
-
-    cargarFavoritos();
-  }, [session, status, router]);
-
   const cargarFavoritos = async () => {
     try {
       const response = await fetch('/api/favoritos');
@@ -49,6 +38,15 @@ export default function Favoritos() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (status === 'loading') return;
+    if (!session?.user?.id) {
+      router.push('/auth/signin');
+      return;
+    }
+    cargarFavoritos();
+  }, [session, status, router, cargarFavoritos]);
 
   const reproducirContenido = async (contenidoId: string) => {
     try {

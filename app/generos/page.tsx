@@ -33,6 +33,10 @@ export default function GenerosPage() {
     }
   }, [session]);
 
+  useEffect(() => {
+    cargarFavoritos();
+  }, [cargarFavoritos]);
+
   const cargarGeneros = async () => {
     try {
       const response = await fetch('/api/generos');
