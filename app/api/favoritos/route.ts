@@ -1,36 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '../../auth';
-
-// Datos de prueba para favoritos
-const favoritosDemo = [
-  {
-    id: '7',
-    titulo: 'Dynamite',
-    tipo: 'cancion' as const,
-    autor: 'BTS',
-    genero: 'K-pop',
-    duracion: '3:19',
-    urlImagen: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop&crop=center'
-  },
-  {
-    id: '8',
-    titulo: 'How You Like That',
-    tipo: 'cancion' as const,
-    autor: 'BLACKPINK',
-    genero: 'K-pop',
-    duracion: '3:01',
-    urlImagen: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=300&h=300&fit=crop&crop=center'
-  },
-  {
-    id: '13',
-    titulo: 'Spring Day',
-    tipo: 'cancion' as const,
-    autor: 'BTS',
-    genero: 'K-pop',
-    duracion: '4:18',
-    urlImagen: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop&crop=center'
-  }
-];
+import clientPromise from '../../../lib/mongodb';
 
 // GET - Obtener favoritos del usuario
 export async function GET() {
@@ -44,9 +14,23 @@ export async function GET() {
     // Simular delay de red
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Por ahora retornamos datos de prueba
-    // En una implementación real, consultarías la base de datos
-    return NextResponse.json(favoritosDemo);
+    const usuarioId = session.user.id;
+    const client = await clientPromise;
+    const db = client.db();
+    const favoritos = await db.collection('favoritos').find({ usuarioId }).toArray();
+    const contenidoIds = favoritos.map(fav => fav.contenidoId);
+    const canciones = await db.collection('canciones').find({ id: { $in: contenidoIds } }).toArray();
+    const podcasts = await db.collection('podcasts').find({ id: { $in: contenidoIds } }).toArray();
+    const contenidos = [...canciones, ...podcasts];
+    // Mapear favoritos a los datos completos del contenido
+    const favoritosCompletos = favoritos.map(fav => {
+      const contenido = contenidos.find(c => c.id === fav.contenidoId) || {};
+      return {
+        ...contenido,
+        id: fav.contenidoId,
+      };
+    });
+    return NextResponse.json(favoritosCompletos);
   } catch (error) {
     console.error('Error obteniendo favoritos:', error);
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
@@ -55,6 +39,9 @@ export async function GET() {
 
 // POST - Agregar favorito
 export async function POST(request: NextRequest) {
+  if (request.headers.get('x-user-type') !== 'registrado') {
+    return new Response('Solo usuarios registrados pueden gestionar favoritos', { status: 401 });
+  }
   try {
     const session = await auth();
     
@@ -62,20 +49,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const { contenidoId } = await request.json();
-    
-    if (!contenidoId) {
-      return NextResponse.json({ error: 'ID de contenido requerido' }, { status: 400 });
+    const { contenido } = await request.json();
+    if (!contenido || !contenido.id) {
+      return NextResponse.json({ error: 'Contenido requerido' }, { status: 400 });
     }
 
-    // Simular delay de red
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    console.log(`Favorito agregado para contenido: ${contenidoId}`);
-    
+    const usuarioId = session.user.id;
+    const client = await clientPromise;
+    const db = client.db();
+    // Evitar duplicados
+    const existe = await db.collection('favoritos').findOne({ usuarioId, contenidoId: contenido.id });
+    if (!existe) {
+      await db.collection('favoritos').insertOne({ usuarioId, contenidoId: contenido.id });
+    }
     return NextResponse.json({ 
       message: 'Favorito agregado exitosamente',
-      contenidoId 
+      contenidoId: contenido.id
     });
   } catch (error) {
     console.error('Error agregando favorito:', error);
@@ -98,11 +87,10 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'ID de contenido requerido' }, { status: 400 });
     }
 
-    // Simular delay de red
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    console.log(`Favorito quitado para contenido: ${contenidoId}`);
-    
+    const usuarioId = session.user.id;
+    const client = await clientPromise;
+    const db = client.db();
+    await db.collection('favoritos').deleteOne({ usuarioId, contenidoId });
     return NextResponse.json({ 
       message: 'Favorito quitado exitosamente',
       contenidoId 

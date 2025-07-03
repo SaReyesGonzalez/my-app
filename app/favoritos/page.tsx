@@ -66,16 +66,22 @@ export default function Favoritos() {
     try {
       const response = await fetch('/api/favoritos', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-type': 'registrado',
+        },
         body: JSON.stringify({ contenidoId })
       });
       
       if (response.ok) {
-        // Remover de la lista local
         setFavoritos(prev => prev.filter(item => item.id !== contenidoId));
+      } else {
+        const data = await response.json();
+        setError(data.error || 'No se pudo quitar el favorito');
       }
     } catch (error) {
       console.error('Error quitando favorito:', error);
+      setError('Error quitando favorito');
     }
   };
 

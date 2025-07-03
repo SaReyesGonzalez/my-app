@@ -162,13 +162,13 @@ export default function RankingsPage() {
             </div>
             <div>
               <div className="text-2xl font-bold">
-                {rankings.reduce((sum, item) => sum + item.reproducciones, 0).toLocaleString()}
+                {(rankings || []).reduce((sum, item) => sum + item.reproducciones, 0).toLocaleString()}
               </div>
               <div className="text-sm text-gray-700">Reproducciones totales</div>
             </div>
             <div>
               <div className="text-2xl font-bold">
-                {Math.round(rankings.reduce((sum, item) => sum + item.reproducciones, 0) / total).toLocaleString()}
+                {Math.round((rankings || []).reduce((sum, item) => sum + item.reproducciones, 0) / total).toLocaleString()}
               </div>
               <div className="text-sm text-gray-700">Promedio por canción</div>
             </div>
@@ -177,7 +177,7 @@ export default function RankingsPage() {
 
         {/* Grid de rankings */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-          {rankings.map((item) => (
+          {(rankings || []).map((item) => (
             <RankingCard
               key={item.id}
               item={item}

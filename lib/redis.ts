@@ -1,18 +1,17 @@
-import Redis from 'ioredis'
+import Redis from 'ioredis';
 
-const redis = new Redis({
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD,
-  maxRetriesPerRequest: 3,
-})
+if (!process.env.REDIS_URL) {
+  throw new Error('Falta la variable de entorno REDIS_URL para Redis Upstash');
+}
 
-redis.on('error', (err) => {
-  console.error('Redis Client Error:', err)
-})
+const redis = new Redis(process.env.REDIS_URL);
 
 redis.on('connect', () => {
-  console.log('Redis connected successfully')
-})
+  console.log('Redis Upstash conectado correctamente');
+});
+redis.on('error', (err) => {
+  console.error('Error de conexión a Redis Upstash:', err);
+});
 
-export default redis 
+export default redis;
+

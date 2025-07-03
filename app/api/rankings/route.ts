@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import redis from '../../../lib/redis';
 
 // Datos de prueba para rankings con contadores de reproducciones
 const rankingsData = {
@@ -219,27 +220,15 @@ const rankingsData = {
   ]
 };
 
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const categoria = searchParams.get('categoria') || 'global';
-    
-    // Simular delay de red
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    const ranking = rankingsData[categoria as keyof typeof rankingsData] || rankingsData.global;
-    
-    return NextResponse.json({
-      categoria,
-      ranking,
-      total: ranking.length,
-      actualizado: new Date().toISOString()
-    });
-  } catch (error) {
-    console.error('Error obteniendo rankings:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+export async function GET() {
+  // Obtener todas las keys de reproducciones
+  const keys = await redis.keys('reproducciones:*');
+  const rankings = [];
+  for (const key of keys) {
+    const count = await redis.get(key);
+    const contenido = key.replace('reproducciones:', '');
+    rankings.push({ contenido, reproducciones: parseInt(count) });
   }
+  rankings.sort((a, b) => b.reproducciones - a.reproducciones);
+  return new Response(JSON.stringify(rankings), { status: 200 });
 } 

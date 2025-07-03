@@ -157,81 +157,30 @@ export default function Home() {
               </button>
             </div>
           </div>
-
-                  {/* Navegación rápida */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-          <Link 
-            href="/rankings" 
-            className="bg-white p-6 rounded-lg shadow-sm border border-purple-200 hover:shadow-md transition-shadow text-center hover:bg-purple-50"
-          >
-            <div className="text-3xl mb-3">🏆</div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Rankings</h3>
-            <p className="text-gray-700">Descubre las canciones más populares</p>
-          </Link>
-          
-          <Link 
-            href="/generos" 
-            className="bg-white p-6 rounded-lg shadow-sm border border-purple-200 hover:shadow-md transition-shadow text-center hover:bg-purple-50"
-          >
-            <div className="text-3xl mb-3">🎵</div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Géneros</h3>
-            <p className="text-gray-700">Explora por género musical</p>
-          </Link>
-          
-          <Link 
-            href="/favoritos" 
-            className="bg-white p-6 rounded-lg shadow-sm border border-purple-200 hover:shadow-md transition-shadow text-center hover:bg-purple-50"
-          >
-            <div className="text-3xl mb-3">❤️</div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Favoritos</h3>
-            <p className="text-gray-700">Tu música guardada</p>
-          </Link>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-purple-200 text-center">
-            <div className="text-3xl mb-3">🎧</div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Reproducir</h3>
-            <p className="text-gray-700">Escucha música sin registro</p>
-          </div>
         </div>
-
-          {/* Contenido principal */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Contenido Recomendado</h2>
-            
-            {loading ? (
-              <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-                <p className="text-gray-700">Cargando contenido...</p>
-              </div>
-            ) : error ? (
-              <div className="text-center py-12">
-                <p className="text-red-600 mb-4">{error}</p>
-                <button
-                  onClick={cargarContenidoInicial}
-                  className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
-                >
-                  Reintentar
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                {recomendaciones.map((item) => (
-                  <ContentCard
-                    key={item.id}
-                    contenido={item}
-                    isFavorite={favoritos.includes(item.id)}
-                    onPlay={reproducirContenido}
-                    onToggleFavorite={agregarFavorito}
-                    showFavoriteButton={!!session?.user?.id}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Footer */}
-          <div className="text-center text-gray-600 text-sm">
-            <p>© 2024 MusicStream. Todos los derechos reservados.</p>
+        {/* Navegación rápida SIEMPRE visible */}
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12">
+            <Link href="/rankings" className="bg-white p-6 rounded-lg shadow-sm border border-purple-200 hover:shadow-md transition-shadow text-center hover:bg-purple-50">
+              <div className="text-3xl mb-3">🏆</div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Rankings</h3>
+              <p className="text-gray-700">Descubre las canciones más populares</p>
+            </Link>
+            <Link href="/generos" className="bg-white p-6 rounded-lg shadow-sm border border-purple-200 hover:shadow-md transition-shadow text-center hover:bg-purple-50">
+              <div className="text-3xl mb-3">🎵</div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Géneros</h3>
+              <p className="text-gray-700">Explora por género musical</p>
+            </Link>
+            <Link href="/favoritos" className="bg-white p-6 rounded-lg shadow-sm border border-purple-200 hover:shadow-md transition-shadow text-center hover:bg-purple-50">
+              <div className="text-3xl mb-3">❤️</div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Favoritos</h3>
+              <p className="text-gray-700">Tu música guardada</p>
+            </Link>
+            <Link href="/playlists" className="bg-white p-6 rounded-lg shadow-sm border border-purple-200 hover:shadow-md transition-shadow text-center hover:bg-purple-50">
+              <div className="text-3xl mb-3">📂</div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Playlists</h3>
+              <p className="text-gray-700">Crea y gestiona tus playlists</p>
+            </Link>
           </div>
         </div>
       </div>
@@ -303,7 +252,7 @@ export default function Home() {
         </div>
 
         {/* Navegación rápida */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12">
           <Link 
             href="/rankings" 
             className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow text-center"
@@ -321,7 +270,24 @@ export default function Home() {
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Géneros</h3>
             <p className="text-gray-600">Explora por género musical</p>
           </Link>
-          
+
+          {session?.user ? (
+            <Link 
+              href="/playlists" 
+              className="bg-white p-6 rounded-lg shadow-sm border border-purple-400 hover:shadow-md transition-shadow text-center hover:bg-purple-50"
+            >
+              <div className="text-3xl mb-3">📂</div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Playlists</h3>
+              <p className="text-gray-700">Crea y gestiona tus playlists</p>
+            </Link>
+          ) : (
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center opacity-60 cursor-not-allowed select-none">
+              <div className="text-3xl mb-3">🔒</div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Playlists</h3>
+              <p className="text-gray-700">Solo para usuarios registrados</p>
+            </div>
+          )}
+
           {session?.user ? (
             /* Opciones para usuarios autenticados */
             <>
@@ -333,7 +299,6 @@ export default function Home() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Favoritos</h3>
                 <p className="text-gray-600">Tu música guardada</p>
               </Link>
-              
               <Link 
                 href="/podcasts" 
                 className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow text-center"
@@ -351,7 +316,6 @@ export default function Home() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Reproducir</h3>
                 <p className="text-gray-600">Escucha música sin registro</p>
               </div>
-              
               <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center">
                 <div className="text-3xl mb-3">🔒</div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Regístrate</h3>

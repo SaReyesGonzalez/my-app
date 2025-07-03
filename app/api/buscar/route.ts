@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import clientPromise from '../../../lib/mongodb';
 
 // Datos de prueba para desarrollo
 const contenidoPrueba = [
@@ -112,31 +113,20 @@ const contenidoPrueba = [
   }
 ];
 
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const query = searchParams.get('q');
-
-    if (!query) {
-      return NextResponse.json(contenidoPrueba);
-    }
-
-    // Búsqueda simple por título, autor o género
-    const resultados = contenidoPrueba.filter(item => 
-      item.titulo.toLowerCase().includes(query.toLowerCase()) ||
-      item.autor.toLowerCase().includes(query.toLowerCase()) ||
-      item.genero.toLowerCase().includes(query.toLowerCase())
-    );
-
-    // Simular delay de red
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    return NextResponse.json(resultados);
-  } catch (error) {
-    console.error('Error en búsqueda:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+export async function GET(request) {
+  const client = await clientPromise;
+  const db = client.db();
+  const { searchParams } = new URL(request.url);
+  const filtro: any = {};
+  if (searchParams.get('genero')) {
+    filtro.genero = searchParams.get('genero');
   }
+  if (searchParams.get('artista')) {
+    filtro.artista = searchParams.get('artista');
+  }
+  if (searchParams.get('tipo')) {
+    filtro.tipo = searchParams.get('tipo'); // 'musica' o 'podcast'
+  }
+  const resultados = await db.collection('canciones').find(filtro).toArray();
+  return NextResponse.json(resultados);
 } 

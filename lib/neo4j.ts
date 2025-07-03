@@ -3,12 +3,15 @@ import neo4j, { Driver, Session } from 'neo4j-driver'
 let driver: Driver
 
 export function getNeo4jDriver(): Driver {
+  if (!process.env.NEO4J_URI || !process.env.NEO4J_USER || !process.env.NEO4J_PASSWORD) {
+    throw new Error('Faltan variables de entorno para Neo4j: NEO4J_URI, NEO4J_USER o NEO4J_PASSWORD')
+  }
   if (!driver) {
     driver = neo4j.driver(
-      process.env.NEO4J_URI || 'bolt://localhost:7687',
+      process.env.NEO4J_URI,
       neo4j.auth.basic(
-        process.env.NEO4J_USER || 'neo4j',
-        process.env.NEO4J_PASSWORD || 'password'
+        process.env.NEO4J_USER,
+        process.env.NEO4J_PASSWORD
       )
     )
   }
@@ -16,8 +19,17 @@ export function getNeo4jDriver(): Driver {
 }
 
 export async function getNeo4jSession(): Promise<Session> {
-  const driver = getNeo4jDriver()
-  return driver.session()
+  console.log('Intentando conectar a Neo4j...');
+  
+  try {
+    const driver = getNeo4jDriver();
+    const session = driver.session({ database: 'app' });
+    console.log('Sesión de Neo4j creada correctamente.');
+    return session;
+  } catch (error) {
+    console.error('Error al intentar conectar a Neo4j:', error);
+    throw error;
+  }
 }
 
 export async function closeNeo4jConnection() {
