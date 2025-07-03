@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import ContentCard from '@/components/ui/ContentCard';
@@ -22,17 +22,6 @@ export default function PodcastsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    cargarGeneros();
-    cargarFavoritos();
-  }, []);
-
-  useEffect(() => {
-    if (session?.user?.id) {
-      cargarFavoritos();
-    }
-  }, [session]);
-
   const cargarGeneros = async () => {
     try {
       const response = await fetch('/api/generos?tipo=podcasts');
@@ -46,7 +35,7 @@ export default function PodcastsPage() {
     }
   };
 
-  const cargarFavoritos = async () => {
+  const cargarFavoritos = useCallback(async () => {
     if (!session?.user?.id) return;
     
     try {
@@ -58,11 +47,18 @@ export default function PodcastsPage() {
     } catch (error) {
       console.error('Error cargando favoritos:', error);
     }
-  };
+  }, [session]);
 
   useEffect(() => {
+    cargarGeneros();
     cargarFavoritos();
-  }, [cargarFavoritos]);
+  }, [cargarGeneros, cargarFavoritos]);
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      cargarFavoritos();
+    }
+  }, [session, cargarFavoritos]);
 
   const seleccionarGenero = async (generoId: string) => {
     setGeneroSeleccionado(generoId);

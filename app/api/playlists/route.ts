@@ -14,7 +14,7 @@ export async function GET() {
     const db = client.db();
     const playlists = await db.collection('playlists').find({ usuarioId }).toArray();
     return NextResponse.json(playlists);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     const nueva = { usuarioId, nombre, canciones: [] };
     const result = await db.collection('playlists').insertOne(nueva);
     return NextResponse.json({ ...nueva, _id: result.insertedId });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }
@@ -60,7 +60,7 @@ export async function DELETE(request: NextRequest) {
     const db = client.db();
     await db.collection('playlists').deleteOne({ _id: playlistId, usuarioId });
     return NextResponse.json({ message: 'Playlist eliminada' });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }
@@ -79,12 +79,12 @@ export async function PUT(request: NextRequest) {
     }
     const client = await clientPromise;
     const db = client.db();
-    const update: any = {};
+    const update: { nombre?: string; canciones?: string[] } = {};
     if (nombre) update.nombre = nombre;
     if (canciones) update.canciones = canciones;
     await db.collection('playlists').updateOne({ _id: playlistId, usuarioId }, { $set: update });
     return NextResponse.json({ message: 'Playlist actualizada' });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 } 

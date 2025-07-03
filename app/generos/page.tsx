@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import ContentCard from '@/components/ui/ContentCard';
@@ -22,20 +22,30 @@ export default function GenerosPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const cargarFavoritos = useCallback(async () => {
+    if (!session?.user?.id) return;
+    
+    try {
+      const response = await fetch('/api/favoritos');
+      if (response.ok) {
+        const data = await response.json();
+        setFavoritos(data.map((item: Contenido) => item.id));
+      }
+    } catch (error) {
+      console.error('Error cargando favoritos:', error);
+    }
+  }, [session]);
+
   useEffect(() => {
     cargarGeneros();
     cargarFavoritos();
-  }, []);
+  }, [cargarGeneros, cargarFavoritos]);
 
   useEffect(() => {
     if (session?.user?.id) {
       cargarFavoritos();
     }
-  }, [session]);
-
-  useEffect(() => {
-    cargarFavoritos();
-  }, [cargarFavoritos]);
+  }, [session, cargarFavoritos]);
 
   const cargarGeneros = async () => {
     try {
@@ -47,20 +57,6 @@ export default function GenerosPage() {
       setError('Error al cargar los géneros');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const cargarFavoritos = async () => {
-    if (!session?.user?.id) return;
-    
-    try {
-      const response = await fetch('/api/favoritos');
-      if (response.ok) {
-        const data = await response.json();
-        setFavoritos(data.map((item: Contenido) => item.id));
-      }
-    } catch (error) {
-      console.error('Error cargando favoritos:', error);
     }
   };
 

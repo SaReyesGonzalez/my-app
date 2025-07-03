@@ -8,7 +8,6 @@ import { useSession } from 'next-auth/react';
 
 interface ContentCardProps {
   contenido: Contenido;
-  isFavorite?: boolean;
   onPlay?: (id: string) => void;
   onToggleFavorite?: (id: string) => void;
   showFavoriteButton?: boolean;
@@ -16,16 +15,13 @@ interface ContentCardProps {
 
 export default function ContentCard({
   contenido,
-  isFavorite = false,
   onPlay,
   onToggleFavorite,
   showFavoriteButton = true
 }: ContentCardProps) {
-  const [imgSrc, setImgSrc] = useState(contenido.urlImagen || '/placeholder-music.jpg');
   const { playTrack } = useAudioPlayer();
   const { data: session } = useSession();
   const [favLoading, setFavLoading] = useState(false);
-  const [favError, setFavError] = useState<string | null>(null);
 
   const handlePlay = () => {
     if (contenido.urlAudio) {
@@ -39,7 +35,6 @@ export default function ContentCard({
   const handleToggleFavorite = async () => {
     if (onToggleFavorite) {
       setFavLoading(true);
-      setFavError(null);
       try {
         const response = await fetch('/api/favoritos', {
           method: 'POST',
@@ -50,22 +45,16 @@ export default function ContentCard({
           body: JSON.stringify({ contenido: { id: contenido.id } })
         });
         if (!response.ok) {
-          const data = await response.json();
-          setFavError(data.error || 'No se pudo agregar a favoritos');
+          // Handle error
         } else {
           onToggleFavorite(contenido.id);
         }
       } catch (error) {
-        setFavError('Error agregando a favoritos');
+        // Handle error
       } finally {
         setFavLoading(false);
       }
     }
-  };
-
-  // Si la imagen falla, usar el placeholder local
-  const handleImgError = () => {
-    setImgSrc('/placeholder-music.jpg');
   };
 
   // Valores por defecto
@@ -76,7 +65,7 @@ export default function ContentCard({
     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-all duration-300 flex flex-col justify-between h-full">
       <div className="relative">
         <Image
-          src={imgSrc}
+          src={contenido.urlImagen || '/placeholder-music.jpg'}
           alt={titulo}
           width={300}
           height={192}
@@ -108,7 +97,6 @@ export default function ContentCard({
           </button>
         )}
       </div>
-      {favError && <div className="text-xs text-red-500 mt-1">{favError}</div>}
     </div>
   );
 } 

@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Contenido {
   id: string;
@@ -22,7 +23,7 @@ export default function Favoritos() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const cargarFavoritos = async () => {
+  const cargarFavoritos = useCallback(async () => {
     try {
       const response = await fetch('/api/favoritos');
       if (response.ok) {
@@ -37,7 +38,7 @@ export default function Favoritos() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -190,10 +191,12 @@ function ContentCard({
   return (
     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-all duration-300">
       <div className="relative">
-        <img
+        <Image
           src={item.urlImagen || '/placeholder-music.jpg'}
           alt={item.titulo}
           className="w-full h-48 object-cover rounded-lg mb-4"
+          width={300}
+          height={192}
         />
         <div className="absolute top-2 right-2">
           <span className="px-2 py-1 bg-black/60 text-white text-xs rounded-full">
